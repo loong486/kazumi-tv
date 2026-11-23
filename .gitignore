@@ -55,3 +55,9 @@ android/build/reports/problems/
 **/macos/Pods/
 **/ios/Podfile.lock
 **/macos/Podfile.lock
+
+# Android release signing
+android/key.properties
+*.jks
+*.keystore
+!android/key.properties.example

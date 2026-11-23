@@ -1,6 +1,9 @@
 package com.example.kazumi
 
 import android.app.PendingIntent
+import android.app.UiModeManager
+import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.BroadcastReceiver
@@ -14,13 +17,16 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.StatFs
+import android.provider.Settings
 import android.net.Uri
 import android.app.PictureInPictureParams
 import android.graphics.drawable.Icon
 import android.util.Rational
 import android.view.View
+import android.view.WindowManager
 import androidx.annotation.NonNull
 import androidx.core.content.ContextCompat
+import androidx.core.content.pm.PackageInfoCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
@@ -34,8 +40,10 @@ class MainActivity: AudioServiceActivity() {
     private val CHANNEL = "com.predidit.kazumi/intent"
     private val STORAGE_CHANNEL = "com.predidit.kazumi/storage"
     private val PIP_CHANNEL = "com.predidit.kazumi/pip"
+    private val TV_CHANNEL = "com.predidit.kazumi/tv"
     private var intentChannel: MethodChannel? = null
     private var pipChannel: MethodChannel? = null
+    private var tvChannel: MethodChannel? = null
     private var downloadDirectoryChannel: MethodChannel? = null
     private var downloadDirectoryHandler: DownloadDirectoryHandler? = null
 
@@ -178,6 +186,23 @@ class MainActivity: AudioServiceActivity() {
                 result.notImplemented()
             }
         }
+
+        tvChannel = MethodChannel(flutterEngine.dartExecutor.binaryMessenger, TV_CHANNEL)
+        tvChannel?.setMethodCallHandler { call, result ->
+            when (call.method) {
+                "isTvDevice" -> result.success(isTvDevice())
+                "setKeepScreenOn" -> {
+                    val enabled = call.argument<Boolean>("enabled") ?: false
+                    setKeepScreenOn(enabled)
+                    result.success(null)
+                }
+                "getSupportedAbis" -> result.success(Build.SUPPORTED_ABIS.toList())
+                "getAppVersionInfo" -> result.success(getAppVersionInfo())
+                "canRequestPackageInstalls" -> result.success(canRequestPackageInstalls())
+                "openInstallPermissionSettings" -> result.success(openInstallPermissionSettings())
+                else -> result.notImplemented()
+            }
+        }
     }
 
     private fun openWithMime(url: String, mimeType: String) {
@@ -249,11 +274,82 @@ class MainActivity: AudioServiceActivity() {
         windowBackgroundOverridden = blackBackground
     }
 
-    private fun isPictureInPictureSupported(): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return false
+    private fun isTvDevice(): Boolean {
+        val uiModeManager = getSystemService(Context.UI_MODE_SERVICE) as? UiModeManager
+        if (uiModeManager?.currentModeType == Configuration.UI_MODE_TYPE_TELEVISION) {
+            return true
         }
-        return packageManager.hasSystemFeature(PackageManager.FEATURE_PICTURE_IN_PICTURE)
+        return packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+    }
+
+    private fun setKeepScreenOn(enabled: Boolean) {
+        runOnUiThread {
+            if (enabled) {
+                window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+    }
+
+    private fun getAppVersionInfo(): Map<String, Any>? {
+        return try {
+            val info = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, 0)
+            }
+            mapOf(
+                "versionName" to (info.versionName ?: ""),
+                "versionCode" to PackageInfoCompat.getLongVersionCode(info)
+            )
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    private fun canRequestPackageInstalls(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            packageManager.canRequestPackageInstalls()
+        } else {
+            true
+        }
+    }
+
+    private fun openInstallPermissionSettings(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            return true
+        }
+        val manageIntent = Intent(
+            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+            Uri.parse("package:$packageName")
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            startActivity(manageIntent)
+            return true
+        } catch (_: ActivityNotFoundException) {
+            // Fall back to security settings on TV ROMs without dedicated handler.
+        } catch (_: SecurityException) {
+            // Fall back to security settings on restricted TV ROMs.
+        }
+        return try {
+            val fallbackIntent = Intent(Settings.ACTION_SECURITY_SETTINGS)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            startActivity(fallbackIntent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            false
+        } catch (_: SecurityException) {
+            false
+        }
+    }
+
+    private fun isPictureInPictureSupported(): Boolean {
+        return false
     }
 
     private fun enterPictureInPicture(): Boolean {

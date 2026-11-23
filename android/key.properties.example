@@ -1,0 +1,55 @@
+# =============================================================================
+# Kazumi TV Android Release Signing Configuration Template
+# Kazumi TV Android 正式版签名配置模板
+# =============================================================================
+#
+# [中文说明]
+# 1. 复制本文件为 android/key.properties（该文件已被 .gitignore 忽略，切勿提交到仓库）。
+# 2. 如果还没有签名密钥，在项目根目录运行以下命令生成正式签名密钥：
+#
+#    keytool -genkey -v -keystore android/app/kazumi-tv-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias kazumi-tv
+#
+# 3. storeFile 路径解析说明（与 CI 路径 android/app/kazumi-tv-release.jks 一致）：
+#    - 相对路径（如 storeFile=kazumi-tv-release.jks）在 android/app/build.gradle 中
+#      通过 file(storeFile) 解析，对应位置为 android/app/kazumi-tv-release.jks。
+#    - 也可以使用绝对路径（如 /path/to/kazumi-tv-release.jks），或相对 android/ 的路径。
+#    - 若不想使用 key.properties，也可通过环境变量提供：
+#      TV_KEYSTORE_PATH、TV_KEYSTORE_PASSWORD、TV_KEY_ALIAS、TV_KEY_PASSWORD。
+#    - 若密钥文件不存在或任一字段为空，release 构建会自动回退为 debug 签名，
+#      不影响本地无签名测试打包。
+# 4. GitHub Actions CI 配置 Secrets（Base64 转换提示）：
+#    - Linux:   base64 -w 0 android/app/kazumi-tv-release.jks
+#    - macOS:   base64 -i android/app/kazumi-tv-release.jks | tr -d '\n'
+#    - Windows (PowerShell):
+#      [Convert]::ToBase64String([IO.File]::ReadAllBytes("android\app\kazumi-tv-release.jks")) | Set-Clipboard
+#    将上述输出写入仓库 Secret：TV_KEYSTORE_BASE64
+#    并配置：TV_KEYSTORE_PASSWORD、TV_KEY_ALIAS、TV_KEY_PASSWORD。
+#
+# [English Instructions]
+# 1. Copy this file to android/key.properties (git-ignored; never commit key.properties
+#    or any *.jks / *.keystore file).
+# 2. Generate a release keystore from the repository root if you do not have one:
+#
+#    keytool -genkey -v -keystore android/app/kazumi-tv-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias kazumi-tv
+#
+# 3. How storeFile is resolved (matches CI path android/app/kazumi-tv-release.jks):
+#    - A relative path such as storeFile=kazumi-tv-release.jks is resolved via
+#      file(storeFile) inside android/app/build.gradle -> android/app/kazumi-tv-release.jks.
+#    - Absolute paths and android/-relative paths are also supported.
+#    - Alternatively, omit android/key.properties and set environment variables:
+#      TV_KEYSTORE_PATH, TV_KEYSTORE_PASSWORD, TV_KEY_ALIAS, TV_KEY_PASSWORD.
+#    - If the keystore file is missing or any of the 4 fields is empty, release builds
+#      automatically fall back to debug signing so unsigned local builds keep working.
+# 4. GitHub Actions CI Secrets (Base64 conversion for TV_KEYSTORE_BASE64):
+#    - Linux:   base64 -w 0 android/app/kazumi-tv-release.jks
+#    - macOS:   base64 -i android/app/kazumi-tv-release.jks | tr -d '\n'
+#    - Windows (PowerShell):
+#      [Convert]::ToBase64String([IO.File]::ReadAllBytes("android\app\kazumi-tv-release.jks")) | Set-Clipboard
+#    Store the base64 output in TV_KEYSTORE_BASE64, along with TV_KEYSTORE_PASSWORD,
+#    TV_KEY_ALIAS, and TV_KEY_PASSWORD.
+# =============================================================================
+
+storeFile=kazumi-tv-release.jks
+storePassword=your_keystore_password
+keyAlias=kazumi-tv
+keyPassword=your_key_password

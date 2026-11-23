@@ -21,14 +21,12 @@ class DisplayModeService {
         return;
       }
 
-      // Restore system orientation on exit, including an existing landscape.
+      // Android TV remains landscape-locked across both shell and player routes.
       await _attempt(() => SystemChrome.setPreferredOrientations(
-            fullscreen
-                ? [
-                    DeviceOrientation.landscapeLeft,
-                    DeviceOrientation.landscapeRight
-                  ]
-                : [],
+            const [
+              DeviceOrientation.landscapeLeft,
+              DeviceOrientation.landscapeRight,
+            ],
           ));
     });
   }

@@ -68,6 +68,26 @@ class SettingsKeys {
     true,
     group: SettingGroup.update,
   );
+  static const tvUpdateRepo = SettingKey<String>(
+    'tvUpdateRepo',
+    '',
+    group: SettingGroup.update,
+  );
+  static const tvUpdateMirror = SettingKey<String>(
+    'tvUpdateMirror',
+    'ghProxy',
+    group: SettingGroup.update,
+  );
+  static const tvUpdateCustomMirrorUrl = SettingKey<String>(
+    'tvUpdateCustomMirrorUrl',
+    '',
+    group: SettingGroup.update,
+  );
+  static const tvIgnoredUpdateVersion = SettingKey<String>(
+    'tvIgnoredUpdateVersion',
+    '',
+    group: SettingGroup.update,
+  );
   static const alwaysOntop = SettingKey<bool>(
     _SettingBoxKey.alwaysOntop,
     false,
@@ -587,6 +607,10 @@ class SettingsKeys {
     searchEnhanceEnable,
     autoUpdate,
     checkPluginUpdateOnStartup,
+    tvUpdateRepo,
+    tvUpdateMirror,
+    tvUpdateCustomMirrorUrl,
+    tvIgnoredUpdateVersion,
     alwaysOntop,
     defaultPlaySpeed,
     defaultShortcutForwardPlaySpeed,

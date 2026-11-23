@@ -22,6 +22,73 @@ if (flutterVersionName == null) {
     flutterVersionName = '1.0'
 }
 
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystorePropertiesFile.withReader('UTF-8') { reader ->
+        keystoreProperties.load(reader)
+    }
+}
+
+def resolvePropertyOrEnv = { String propName, String envName, boolean trimValue = false ->
+    def propVal = keystoreProperties.getProperty(propName)
+    if (propVal != null) {
+        def candidate = trimValue ? propVal.trim() : propVal
+        if (!candidate.isEmpty()) {
+            return candidate
+        }
+    }
+    def envVal = System.getenv(envName)
+    if (envVal != null) {
+        def candidate = trimValue ? envVal.trim() : envVal
+        if (!candidate.isEmpty()) {
+            return candidate
+        }
+    }
+    return null
+}
+
+def resolveKeystoreFile = { String rawPath ->
+    if (rawPath == null || rawPath.trim().isEmpty()) {
+        return null
+    }
+    def trimmed = rawPath.trim()
+    // Relative storeFile values in android/key.properties resolve via android/app/file(...).
+    // Also fall back to android/ (rootProject.file) and repo root for convenience.
+    def appRelative = file(trimmed)
+    if (appRelative.exists() && appRelative.isFile()) {
+        return appRelative
+    }
+    def androidRelative = rootProject.file(trimmed)
+    if (androidRelative.exists() && androidRelative.isFile()) {
+        return androidRelative
+    }
+    if (!new File(trimmed).isAbsolute() && rootProject.projectDir.parentFile != null) {
+        def repoRelative = new File(rootProject.projectDir.parentFile, trimmed)
+        if (repoRelative.exists() && repoRelative.isFile()) {
+            return repoRelative
+        }
+    }
+    return appRelative
+}
+
+def releaseStoreFilePath = resolvePropertyOrEnv('storeFile', 'TV_KEYSTORE_PATH', true)
+def releaseStoreFile = resolveKeystoreFile(releaseStoreFilePath)
+def releaseStorePassword = resolvePropertyOrEnv('storePassword', 'TV_KEYSTORE_PASSWORD', false)
+def releaseKeyAlias = resolvePropertyOrEnv('keyAlias', 'TV_KEY_ALIAS', true)
+def releaseKeyPassword = resolvePropertyOrEnv('keyPassword', 'TV_KEY_PASSWORD', false)
+
+def hasReleaseSigning = releaseStoreFile != null &&
+        releaseStoreFile.exists() &&
+        releaseStoreFile.isFile() &&
+        releaseStorePassword != null && !releaseStorePassword.isEmpty() &&
+        releaseKeyAlias != null && !releaseKeyAlias.isEmpty() &&
+        releaseKeyPassword != null && !releaseKeyPassword.isEmpty()
+
+if (!hasReleaseSigning && (keystorePropertiesFile.exists() || releaseStoreFilePath != null)) {
+    logger.warn('Release signing configuration is incomplete or keystore file is missing; falling back to debug signing.')
+}
+
 android {
     namespace "com.example.kazumi"
     compileSdk flutter.compileSdkVersion
@@ -44,7 +111,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.predidit.kazumi"
+        applicationId "com.predidit.kazumi.tv"
         // You can update the following values to match your application needs.
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-gradle-build-configuration.
         minSdkVersion flutter.minSdkVersion
@@ -53,11 +120,20 @@ android {
         versionName flutterVersionName
     }
 
+    signingConfigs {
+        if (hasReleaseSigning) {
+            release {
+                storeFile releaseStoreFile
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig signingConfigs.debug
+            signingConfig hasReleaseSigning ? signingConfigs.release : signingConfigs.debug
         }
     }
 
@@ -80,13 +156,23 @@ dependencies {}
 // * https://developer.android.com/build/gradle-tips
 // * https://developer.android.com/studio/build/configure-apk-splits
 // * https://gitlab.com/fdroid/fdroiddata/-/blob/master/metadata/im.nfc.nfsee.yml
+// Note: Flutter's Gradle plugin mutates per-output versionCodes to ABI*1000 + base in its own
+// `onVariants` callback, which causes legacy `applicationVariants` to see a mutated `variant.versionCode`.
+// Using `androidComponents.onVariants` runs after Flutter's callback and computes directly from the
+// unmutated `defaultConfig.versionCode`.
+import com.android.build.api.variant.FilterConfiguration
 ext.abiCodes = ["armeabi-v7a": 1, "arm64-v8a": 2, "x86_64": 4]
-import com.android.build.OutputFile
-android.applicationVariants.all { variant ->
-    variant.outputs.each { output ->
-        def abiVersionCode = project.ext.abiCodes.get(output.getFilter(OutputFile.ABI))
-        if (abiVersionCode != null) {
-            output.versionCodeOverride = variant.versionCode * 10 + abiVersionCode
+androidComponents {
+    onVariants(selector().all()) { variant ->
+        def baseVersionCode = android.defaultConfig.versionCode ?: flutterVersionCode.toInteger()
+        variant.outputs.each { output ->
+            def abiFilter = output.filters.find {
+                it.filterType == FilterConfiguration.FilterType.ABI
+            }
+            def abiVersionCode = abiFilter != null ? project.ext.abiCodes.get(abiFilter.identifier) : null
+            if (abiVersionCode != null) {
+                output.versionCode.set(baseVersionCode * 10 + abiVersionCode)
+            }
         }
     }
 }

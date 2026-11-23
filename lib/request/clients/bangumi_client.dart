@@ -56,7 +56,7 @@ class BangumiClient {
     CancelToken? cancelToken,
   }) async {
     final uri = Uri.parse(url);
-    final route = _route(uri, requiresAuth);
+    final route = _route(uri, requiresAuth, method);
     try {
       final response = await DioFactory.bangumiDio.request(
         route == BangumiAcceleration.mirror
@@ -87,11 +87,22 @@ class BangumiClient {
   }
 
   /// User-scoped requests always reach the official API over ECH.
-  BangumiAcceleration _route(Uri uri, bool requiresAuth) {
+  /// Local builds without mirror signing secrets also fall back to ECH
+  /// for protected mirror endpoints such as search.
+  BangumiAcceleration _route(Uri uri, bool requiresAuth, String method) {
     if (!ApiEndpoints.bangumiPublicApiHosts.contains(uri.host)) {
       return BangumiAcceleration.direct;
     }
-    return requiresAuth ? BangumiAcceleration.ech : BangumiAcceleration.current;
+    if (requiresAuth) {
+      return BangumiAcceleration.ech;
+    }
+    final preferred = BangumiAcceleration.current;
+    if (preferred == BangumiAcceleration.mirror &&
+        _isProtectedMirrorPath(method, uri.path) &&
+        !BangumiAcceleration.hasMirrorCredentials) {
+      return BangumiAcceleration.ech;
+    }
+    return preferred;
   }
 
   Map<String, dynamic> _headers({
