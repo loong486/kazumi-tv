@@ -63,6 +63,14 @@ class _TvSettingsPageState extends State<TvSettingsPage> {
 
   int _categoryIndex = 0;
   final ImageCacheService _imageCache = ImageCacheService();
+  final FocusScopeNode _categoryScopeNode =
+      FocusScopeNode(debugLabel: 'TvSettingsCategories');
+  final FocusScopeNode _detailScopeNode =
+      FocusScopeNode(debugLabel: 'TvSettingsDetail');
+  late final List<FocusNode> _categoryNodes = List<FocusNode>.generate(
+    _categories.length,
+    (i) => FocusNode(debugLabel: 'TvSettingsCategory_$i'),
+  );
   int? _cacheBytes;
   bool _syncBusy = false;
   bool _checkingUpdate = false;
@@ -71,6 +79,33 @@ class _TvSettingsPageState extends State<TvSettingsPage> {
   void initState() {
     super.initState();
     unawaited(_refreshCacheSize());
+  }
+
+  @override
+  void dispose() {
+    for (final node in _categoryNodes) {
+      node.dispose();
+    }
+    _categoryScopeNode.dispose();
+    _detailScopeNode.dispose();
+    super.dispose();
+  }
+
+  void _focusDetailPane() {
+    final previous = _detailScopeNode.focusedChild;
+    if (previous != null &&
+        previous.canRequestFocus &&
+        !previous.skipTraversal &&
+        previous.context != null) {
+      previous.requestFocus();
+      return;
+    }
+    for (final candidate in _detailScopeNode.traversalDescendants) {
+      if (candidate.canRequestFocus && !candidate.skipTraversal) {
+        candidate.requestFocus();
+        return;
+      }
+    }
   }
 
   Future<void> _refreshCacheSize() async {
@@ -147,95 +182,116 @@ class _TvSettingsPageState extends State<TvSettingsPage> {
               children: [
                 SizedBox(
                   width: 256,
-                  child: TvAxisClipRect(
-                    axis: Axis.vertical,
-                    child: ListView.separated(
-                      clipBehavior: Clip.none,
-                      padding: const EdgeInsets.all(18),
-                      itemCount: _categories.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 10),
-                      itemBuilder: (context, index) {
-                        final cat = _categories[index];
-                        final selected = index == _categoryIndex;
-                        return TvFocusable(
-                          borderRadius: 14,
-                          scaleOnFocus: 1.03,
-                          onSelect: () => setState(() => _categoryIndex = index),
-                          onFocusChange: (focused) {
-                            if (focused && _categoryIndex != index) {
-                              setState(() => _categoryIndex = index);
-                            }
-                          },
-                          onKeyEvent: (_, event) {
-                            if (event is KeyDownEvent &&
-                                TvKeys.isLeftKey(event.logicalKey)) {
-                              TvShellScope.maybeOf(context)?.focusRail();
-                              return KeyEventResult.handled;
-                            }
-                            return KeyEventResult.ignored;
-                          },
-                          builder: (context, focused) {
-                            final bg = selected
-                                ? colors.primary
-                                : focused
-                                    ? colors.surfaceContainerHighest
-                                    : colors.surfaceContainer;
-                            final fg =
-                                selected ? colors.onPrimary : colors.onSurface;
-                            return Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              decoration: BoxDecoration(
-                                color: bg,
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                              child: Row(
-                                children: [
-                                  Icon(cat.icon, size: 22, color: fg),
-                                  const SizedBox(width: 12),
-                                  Text(
-                                    cat.title,
-                                    style: TextStyle(
-                                      color: fg,
-                                      fontSize: 15,
-                                      fontWeight: selected || focused
-                                          ? FontWeight.w700
-                                          : FontWeight.w500,
+                  child: FocusScope(
+                    node: _categoryScopeNode,
+                    child: TvAxisClipRect(
+                      axis: Axis.vertical,
+                      child: ListView.separated(
+                        clipBehavior: Clip.none,
+                        padding: const EdgeInsets.all(18),
+                        itemCount: _categories.length,
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final cat = _categories[index];
+                          final selected = index == _categoryIndex;
+                          return TvFocusable(
+                            focusNode: _categoryNodes[index],
+                            borderRadius: 14,
+                            scaleOnFocus: 1.03,
+                            onSelect: () =>
+                                setState(() => _categoryIndex = index),
+                            onFocusChange: (focused) {
+                              if (focused && _categoryIndex != index) {
+                                setState(() => _categoryIndex = index);
+                              }
+                            },
+                            onKeyEvent: (_, event) {
+                              if (event is KeyDownEvent) {
+                                if (TvKeys.isLeftKey(event.logicalKey)) {
+                                  TvShellScope.maybeOf(context)?.focusRail();
+                                  return KeyEventResult.handled;
+                                }
+                                if (TvKeys.isRightKey(event.logicalKey)) {
+                                  _focusDetailPane();
+                                  return KeyEventResult.handled;
+                                }
+                              }
+                              return KeyEventResult.ignored;
+                            },
+                            builder: (context, focused) {
+                              final bg = selected
+                                  ? colors.primary
+                                  : focused
+                                      ? colors.surfaceContainerHighest
+                                      : colors.surfaceContainer;
+                              final fg =
+                                  selected ? colors.onPrimary : colors.onSurface;
+                              return Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: bg,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(cat.icon, size: 22, color: fg),
+                                    const SizedBox(width: 12),
+                                    Text(
+                                      cat.title,
+                                      style: TextStyle(
+                                        color: fg,
+                                        fontSize: 15,
+                                        fontWeight: selected || focused
+                                            ? FontWeight.w700
+                                            : FontWeight.w500,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
+                                  ],
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(width: 24),
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(6),
-                    decoration: BoxDecoration(
-                      color: colors.surfaceContainer,
-                      borderRadius: BorderRadius.circular(18),
-                    ),
-                    child: TvAxisClipRect(
-                      axis: Axis.vertical,
-                      child: ListView(
-                        key: ValueKey(_categoryIndex),
-                        clipBehavior: Clip.none,
-                        padding: const EdgeInsets.all(18),
-                        children: switch (_categoryIndex) {
-                          0 => _buildPlayerSettings(),
-                          1 => _buildDanmakuSettings(),
-                          2 => _buildSyncSettings(),
-                          3 => _buildNetworkSettings(),
-                          4 => _buildDisplaySettings(),
-                          _ => _buildAboutSettings(),
-                        },
+                  child: FocusScope(
+                    node: _detailScopeNode,
+                    onKeyEvent: (_, event) {
+                      if (event is KeyDownEvent &&
+                          TvKeys.isLeftKey(event.logicalKey)) {
+                        _categoryNodes[_categoryIndex].requestFocus();
+                        return KeyEventResult.handled;
+                      }
+                      return KeyEventResult.ignored;
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: colors.surfaceContainer,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: TvAxisClipRect(
+                        axis: Axis.vertical,
+                        child: ListView(
+                          key: ValueKey(_categoryIndex),
+                          clipBehavior: Clip.none,
+                          padding: const EdgeInsets.all(18),
+                          children: switch (_categoryIndex) {
+                            0 => _buildPlayerSettings(),
+                            1 => _buildDanmakuSettings(),
+                            2 => _buildSyncSettings(),
+                            3 => _buildNetworkSettings(),
+                            4 => _buildDisplaySettings(),
+                            _ => _buildAboutSettings(),
+                          },
+                        ),
                       ),
                     ),
                   ),
@@ -1384,9 +1440,13 @@ class _TvSwitchTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 12),
-                Switch(
-                  value: value,
-                  onChanged: null,
+                ExcludeFocus(
+                  child: IgnorePointer(
+                    child: Switch(
+                      value: value,
+                      onChanged: onChanged,
+                    ),
+                  ),
                 ),
               ],
             ),

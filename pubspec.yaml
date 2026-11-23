@@ -1,7 +1,7 @@
 name: kazumi
 description: "Kazumi TV - Pure Android TV anime client based on Predidit/Kazumi with D-pad UX and OTA updates."
 publish_to: "none"
-version: 1.0.0+10000
+version: 1.0.1+10001
 
 environment:
   sdk: ">=3.10.0 <4.0.0"

@@ -24,6 +24,49 @@ class TvLayout {
 class TvTheme {
   TvTheme._();
 
+  static SwitchThemeData _buildSwitchTheme(
+    ColorScheme colorScheme, {
+    required bool isDark,
+  }) {
+    return SwitchThemeData(
+      trackColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.onSurface.withValues(alpha: 0.12);
+          }
+          return colorScheme.surfaceContainerHighest.withValues(alpha: 0.12);
+        }
+        if (states.contains(WidgetState.selected)) {
+          return colorScheme.primary;
+        }
+        return isDark
+            ? const Color(0xFF2B3245)
+            : colorScheme.surfaceContainerHighest;
+      }),
+      thumbColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.disabled)) {
+          if (states.contains(WidgetState.selected)) {
+            return colorScheme.surface;
+          }
+          return colorScheme.onSurface.withValues(alpha: 0.38);
+        }
+        if (states.contains(WidgetState.selected)) {
+          return colorScheme.onPrimary;
+        }
+        return colorScheme.onSurfaceVariant;
+      }),
+      trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+        if (states.contains(WidgetState.selected)) {
+          return Colors.transparent;
+        }
+        if (states.contains(WidgetState.disabled)) {
+          return colorScheme.onSurface.withValues(alpha: 0.12);
+        }
+        return colorScheme.outline;
+      }),
+    );
+  }
+
   static ThemeData buildTheme({
     required Brightness brightness,
     Color? seedColor,
@@ -68,6 +111,7 @@ class TvTheme {
       progressIndicatorTheme: progressIndicatorTheme2024,
       sliderTheme: sliderTheme2024,
       pageTransitionsTheme: pageTransitionsTheme2024,
+      switchTheme: _buildSwitchTheme(adjustedScheme, isDark: isDark),
       dialogTheme: DialogThemeData(
         backgroundColor: containerHigh,
         shape: RoundedRectangleBorder(
@@ -89,10 +133,12 @@ class TvTheme {
     );
 
     if (isDark && oledEnhance) {
-      return oledDarkTheme(base).copyWith(
+      final oled = oledDarkTheme(base);
+      return oled.copyWith(
         focusColor: base.focusColor,
         dialogTheme: base.dialogTheme,
         snackBarTheme: base.snackBarTheme,
+        switchTheme: _buildSwitchTheme(oled.colorScheme, isDark: true),
       );
     }
     return base;
