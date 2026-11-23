@@ -1,212 +1,122 @@
-<div align=center>
+<div align="center">
 
-<h1>Kazumi</h1>
+<h1>Kazumi TV</h1>
 
-<img src="assets/images/logo/logo_rounded.png" width=200></img>
+<img src="assets/images/logo/logo_rounded.png" width="160" alt="Kazumi TV Logo" />
 
-<a href="https://t.me/kazumi_app"><img src="https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white"></img></a>
+<p>
+  <img src="https://img.shields.io/badge/Platform-Android%20TV-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android TV" />
+  <img src="https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white" alt="Flutter" />
+  <img src="https://img.shields.io/badge/License-GPL--3.0-blue?style=for-the-badge" alt="GPL-3.0" />
+  <a href="https://github.com/loong486/kazumi-tv/releases/latest">
+    <img src="https://img.shields.io/github/v/release/loong486/kazumi-tv?style=for-the-badge&label=Release" alt="Latest Release" />
+  </a>
+</p>
 
-<img src="https://img.shields.io/badge/Flutter-03A9F4?style=for-the-badge&logo=flutter&logoColor=white"></img>
-<img src="https://img.shields.io/badge/Dart-00B4AB?style=for-the-badge&logo=Dart&logoColor=white"></img>
+<p>
+  基于 <a href="https://github.com/Predidit/Kazumi">Predidit/Kazumi</a>（v2.4.6 基线）打造的<strong>纯 Android TV 专用番剧客户端</strong>。<br/>
+  专为客厅大屏与电视遥控器重新设计交互、焦点系统与播放器，支持自定义 XPath 规则、多源弹幕、跨设备同步与应用内在线更新。
+</p>
 
-<a href="https://trendshift.io/repositories/11432"><img src="https://trendshift.io/api/badge/trendshift/repositories/11432/yearly?language=Dart"></img></a>
-<a href="https://hellogithub.com/repository/Predidit/Kazumi" target="_blank"><img src="https://abroad.hellogithub.com/v1/widgets/recommend.svg?rid=68d824ea55ee4b07aba6fe1dd61ac939&claim_uid=J9Qu6aDd8LT1nU0"/></img></a>
-
-<p>使用 Flutter 开发的基于自定义规则的番剧采集与在线观看程序。使用最多五行基于 <code>Xpath</code> 语法的选择器构建自己的规则。支持规则导入与规则分享。支持基于 <code>Anime4K</code> 的实时超分辨率。绝赞开发中 (～￣▽￣)～</p>
 </div>
 
-## 支持平台
+---
 
-- Android 10 及以上
-- Windows 10 及以上
-- MacOS 10.15 及以上
-- Linux (实验性)
-- iOS 13 及以上 (需要 [侧载](https://kazumi.app/docs/misc/how-to-install-in-ios))
-- HarmonyOS 5.0 及以上 (位于 [分支仓库](https://github.com/ErBWs/Kazumi/releases/latest)，需要 [侧载](https://kazumi.app/docs/misc/how-to-install-in-ohos))
-- Web 浏览器 (位于 [分支仓库](https://github.com/0Chencc/KazumiWeb/releases/latest)，需要在 Windows / Linux / MacOS 电脑或通过 Docker 运行服务端，同一局域网内的设备通过浏览器访问)
+## 核心特性
 
-## 屏幕截图
+- **10ft 客厅大屏与遥控器交互**
+  - 专为 Android TV 设计的左侧导航栏（热门 / 时间表 / 搜索 / 追番 / 历史 / 规则 / 设置），去除手机端触屏组件与手势依赖。
+  - 自定义 `TvFocusTraversalPolicy` 与 `TvAxisClipRect` 焦点高亮体系：方向键上下左右不跳行、列表边缘辉光不裁切、返回键分级回退防误触退出。
+  - 独立包名 `com.predidit.kazumi.tv`，自带 Android TV Leanback 桌面横幅（Banner），可与原版手机/平板 Kazumi 共存。
+- **遥控器优先的视频与弹幕播放器**
+  - 基于 `media_kit` 硬件解码与低内存友好策略，适配大屏高帧率显示模式。
+  - 内置多源弹幕渲染（B 站 / 巴哈姆特 / 弹弹 play），支持在播放页遥控器手动搜索和切换弹幕源。
+  - 播放界面方向键上/下统一唤起控制栏与功能抽屉（选集、线路/换源、倍速、画面比例、弹幕设置），左/右键快退快进。
+- **规则仓库与数据同步**
+  - 完整兼容 [Predidit/KazumiRules](https://github.com/Predidit/KazumiRules) XPath 规则，首次启动向导支持网络连通检测与规则一键导入，支持启动时自动检查规则更新。
+  - 支持 WebDAV 同步观看历史、追番收藏与弹幕屏蔽词，支持 Bangumi 收藏同步。
+- **应用内在线更新（OTA）**
+  - 基于 GitHub Releases 与自动生成的 `latest.json` 清单，按设备 `SUPPORTED_ABIS` 自动匹配对应架构 APK。
+  - 内置多镜像降级链（`gh-proxy` / `ghfast` / 自定义镜像 / 直连 GitHub），下载过程使用流式 SHA-256 校验，校验通过后直接调起系统安装器覆盖升级。
 
-<table>
-  <tr>
-    <td><img alt="homepage" src="static/screenshot/img_1.png"></td>
-    <td><img alt="timetable" src="static/screenshot/img_2.png"></td>
-    <td><img alt="details" src="static/screenshot/img_3.png"></td>
-  <tr>
-  <tr>
-    <td><img alt="selection-page" src="static/screenshot/img_4.png"></td>
-    <td><img alt="rules-mange" src="static/screenshot/img_5.png"></td>
-    <td><img alt="rules-edit" src="static/screenshot/img_6.png"></td>
-  <tr>
-</table>
+## 支持环境
 
-## 功能 / 开发计划
+- **系统要求**：Android TV / 智能电视 / 电视盒子，**Android 7.0（API 24）及以上**（推荐 Android 9+）。
+- **架构支持**：提供 `arm64-v8a`、`armeabi-v7a`、`x86_64` 分架构安装包。
+- **已验证机型特性**：兼容标准 Android TV Leanback 遥控器及 TCL 等国产电视遥控器键值与焦点行为。
 
-- [X]  规则编辑器
-- [X]  番剧目录
-- [X]  番剧搜索
-- [X]  番剧时间表
-- [X]  番剧字幕
-- [X]  分集播放
-- [X]  视频播放器
-- [X]  多视频源支持
-- [X]  规则分享
-- [X]  硬件加速
-- [X]  高刷适配
-- [X]  追番列表
-- [X]  番剧弹幕
-- [X]  在线更新
-- [X]  历史记录
-- [X]  倍速播放
-- [X]  配色方案
-- [X]  跨设备同步
-- [X]  无线投屏 (DLNA)
-- [X]  外部播放器播放
-- [X]  超分辨率
-- [X]  一起看
-- [X]  番剧下载
-- [ ]  番剧更新提醒
-- [ ]  还有更多 (/・ω・＼)
+## 下载与安装
 
-## 下载
+前往本仓库 [Releases 页面](https://github.com/loong486/kazumi-tv/releases/latest) 下载对应架构的 APK：
 
-通过本页面 [Releases](https://github.com/Predidit/Kazumi/releases/latest) 选项卡下载：
-
-<a href="https://github.com/Predidit/Kazumi/releases">
-  <img src="static/svg/get_it_on_github.svg" alt="Get it on Github" width="200"/>
+<a href="https://github.com/loong486/kazumi-tv/releases/latest">
+  <img src="static/svg/get_it_on_github.svg" alt="Get it on GitHub" width="200" />
 </a>
 
-### Android
+| 安装包文件名 | 适用设备 |
+| :--- | :--- |
+| `KazumiTV_<版本>_arm64-v8a.apk` | **绝大多数现代 64 位 Android TV / 电视盒子（首选）** |
+| `KazumiTV_<版本>_armeabi-v7a.apk` | 较老的 32 位 ARM 电视 / 盒子 |
+| `KazumiTV_<版本>_x86_64.apk` | x86_64 架构设备或 Android TV 模拟器 |
 
-<a href="https://f-droid.org/packages/com.predidit.kazumi">
-  <img src="https://fdroid.gitlab.io/artwork/badge/get-it-on-zh-hans.svg"
-  alt="Get it on F-Droid" width="200">
-</a>
+### 安装方式
+- **U 盘 / 电视文件管理器安装**：下载对应 APK 拷贝至 U 盘或通过电视局域网传文件安装（国产电视需在系统设置中允许安装未知来源应用）。
+- **无线 ADB 安装**：
+  ```bash
+  adb connect <电视IP>:5555
+  adb install -r KazumiTV_<版本>_arm64-v8a.apk
+  ```
 
-### GNU/Linux
+## 遥控器按键说明
 
-<a href="https://flathub.org/apps/io.github.Predidit.Kazumi">
-  <img src="https://flathub.org/api/badge?svg&locale=zh-Hans" alt="Get it on Flathub" width="175"/>
-</a>
+| 场景 | 按键 | 功能 |
+| :--- | :--- | :--- |
+| **主界面 / 列表** | 方向键 `↑ ↓ ← →` | 移动焦点；列表最左侧按 `←` 返回左侧导航栏 |
+| **主界面 / 列表** | `OK / 确认` | 打开番剧详情 / 切换筛选或开关 |
+| **主界面 / 列表** | `返回` | 逐级退回上一页 -> 回到左侧栏 -> 回到「热门」 -> 首页双击退出 |
+| **播放界面** | `OK / 确认` | 暂停 / 恢复播放 |
+| **播放界面** | `← / →` | 快退 / 快进（可在设置中自定义步长） |
+| **播放界面** | `↑ / ↓` | 唤起播放控制栏与选集 / 换源 / 弹幕 / 播放设置抽屉 |
+| **播放界面** | `返回` | 关闭抽屉或控制栏；无浮层时双击退出播放 |
 
-#### Arch Linux
+## 应用内在线更新配置
 
-可以从 [AUR](http://aur.archlinux.org) 安装。
+进入 **设置 -> 关于与日志**：
+- **检查应用更新**：手动拉取最新 Release 信息并按当前电视 CPU 架构下载安装。
+- **启动时自动检查更新**：默认开启，进入首页后静默检查，支持「忽略此版本」。
+- **更新下载镜像**：支持切换 `gh-proxy`、`ghfast`、**自定义镜像**（如自建 Cloudflare Worker 加速前缀）或直连 GitHub；下载失败时会自动按降级链重试。
+- **更新仓库**：默认指向 `loong486/kazumi-tv`，可自定义为其他 fork 仓库地址。
 
-##### AUR
+## 自行构建与自动发版
 
+### 本地构建
 ```bash
-[yay/paru] -S kazumi # 从源码构建
-[yay/paru] -S kazumi-bin # 二进制包
+flutter pub get
+flutter build apk --release --split-per-abi --dart-define=TV_UPDATE_REPO=loong486/kazumi-tv
 ```
 
-## 贡献
+### 正式签名配置
+复制 [android/key.properties.example](android/key.properties.example) 为 `android/key.properties`（已被 `.gitignore` 忽略）并按注释生成 `.jks` 签名密钥；未配置密钥时，本地 `release` 构建会自动回退为 debug 签名。
 
-欢迎向我们的 [规则仓库](https://github.com/Predidit/KazumiRules) 提交您的自定义规则。您可以自由选择是否在规则中留下您的ID。详细的规则编写教程可以参考 [规则开发文档](https://kazumi.app/docs/rules/develop-rules)
+### GitHub Actions 自动发布
+推送 `v*` 格式标签（如 `v1.0.1`）或在 Actions 页面手动触发 [Release Android TV](.github/workflows/release.yaml) 工作流，将自动执行：
+1. `flutter analyze --no-fatal-infos --fatal-warnings` 与全量 `flutter test`；
+2. 解密仓库 Secrets（`TV_KEYSTORE_BASE64`、`TV_KEYSTORE_PASSWORD`、`TV_KEY_ALIAS`、`TV_KEY_PASSWORD`）并构建三架构正式签名 APK；
+3. 运行 [tool/generate_update_manifest.dart](tool/generate_update_manifest.dart) 生成 `latest.json` 与 `SHA256SUMS.txt` 并发布至 GitHub Release。
 
-## Q&A
+## 美术资源与字体声明
 
-<details>
-<summary>使用者 Q&A</summary>
+- 应用图标源自原作者 [Yuquanaaa](https://www.pixiv.net/users/66219277) 在 [Pixiv](https://www.pixiv.net/artworks/116666979) 的作品，继承自上游 Kazumi 项目授权，未经原作者明确授权不得用于其他商业或独立分发用途。
+- 内嵌字体为小米开发的 [Mi Sans](https://hyperos.mi.com/font/zh/details/sc/) 字体，版权归 Xiaomi 所有。
 
-#### Q: 为什么少数番剧中有广告？
+## 免责声明与隐私政策
 
-A: 本项目未插入任何广告。广告来自视频源, 请不要相信广告中的任何内容, 并尽量选择没有广告的视频源观看。
-
-#### Q: 为什么我启用超分辨率功能后播放卡顿？
-
-A: 超分辨率功能对 GPU 性能要求较高, 如果没有在高性能独立显卡上运行 Kazumi, 尽量选择效率档而非质量档。对低分辨率视频源而非高分辨率视频源使用超分也可以降低性能消耗。
-
-#### Q: 为什么播放视频时内存占用较高？
-
-A: 本程序在视频播放时, 会尽可能多地缓存视频到内存, 以提供较好的观看体验。如果您的内存较为紧张, 可以在播放设置选项卡启用低内存模式, 这将限制缓存。
-
-#### Q: 为什么少数番剧无法通过外部播放器观看？
-
-A: 部分视频源的番剧使用了反盗链措施, 这可以被 Kazumi 解决, 但无法被外部播放器解决。
-
-#### Q: 为什么下载的 Linux 版本缺少图标和托盘功能？
-
-A: 使用 .deb 版本进行安装, tar.gz 版本仅为方便二次打包, 这一格式先天缺乏图标和托盘功能支持。
-
-</details>
-
-<details>
-<summary>规则编写者 Q&A</summary>
-
-#### Q: 为什么我的自定义规则无法实现检索？
-
-A: 目前我们对 `Xpath` 语法的支持并不完整, 我们目前只支持以 `//` 开头的选择器。建议参照我们给出的示例规则构建自定义规则。
-
-#### Q: 为什么我的自定义规则可以实现检索, 但不能实现观看？
-
-A: 尝试关闭自定义规则的使用内置播放器选项, 这将尝试使用 `webview` 进行播放, 提高兼容性。但在内置播放器可用时, 建议启用内置播放器, 以获得更加流畅并带有弹幕的观看体验。
-
-</details>
-
-<details>
-<summary>开发者 Q&A</summary>
-
-#### Q: 我在尝试自行编译该项目, 但编译没有成功。
-
-A: 本项目编译需要良好的网络环境, 除了由 Google 托管的 Flutter 相关依赖外, 本项目同样依赖托管在 MavenCentral/Github/SourceForge 上的资源。如果您位于中国大陆, 可能需要设置恰当的镜像地址。
-
-</details>
-
-## 开发
-
-欢迎您提交 PR！在开始之前, 请阅读 [贡献指引](static/doc/CONTRIBUTING.md) 以了解我们对 PR 和 AI 参与辅助开发的规定。
-
-## 美术资源
-
-本项目图标来自 [Yuquanaaa](https://www.pixiv.net/users/66219277) 发表在 [Pixiv](https://www.pixiv.net/artworks/116666979) 上的作品。
-
-此图标由其原作者 [Yuquanaaa](https://www.pixiv.net/users/66219277) 拥有版权。我们已获得原作者的授权和许可, 可以在本项目中使用这一图标。这一图标不是自由使用的, 未经原作者明确授权, 任何人不得擅自使用、复制、修改或分发这一图标。
-
-本项目内嵌字体为 [Mi Sans](https://hyperos.mi.com/font/zh/details/sc/) 字体, 由 [Xiaomi](https://www.mi.com/index.html) 开发和拥有版权。
-
-## 免责声明
-
-本项目基于 GNU 通用公共许可证第 3 版（GPL-3.0）授权。我们不对其适用性、可靠性或准确性作出任何明示或暗示的保证。在法律允许的最大范围内, 作者和贡献者不承担任何因使用本软件而产生的直接、间接、偶然、特殊或后果性的损害赔偿责任。
-
-使用本项目需遵守所在地法律法规, 不得进行任何侵犯第三方知识产权的行为。因使用本项目而产生的数据和缓存应在24小时内清除, 超出 24 小时的使用需获得相关权利人的授权。
-
-## 隐私政策
-
-我们不收集任何用户数据, 不使用任何遥测组件。
-
-## 代码签名策略
-
-提交者: [贡献者](https://github.com/Predidit/Kazumi/graphs/contributors)
-审阅者: [所有者](https://github.com/Predidit)
-
-## 赞助
-
-
-| ![signpath](https://signpath.org/assets/favicon-50x50.png)                                                                                                                      | Free code signing on Windows provided by[SignPath.io](https://about.signpath.io/), certficate by [SignPath Foundation](https://signpath.org/) |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| <img src="https://kilo.ai/favicon/favicon.svg" width="50">                                                                                                                      | **Automatic PR review provided by [Kilo Code](https://kilo.ai/), sponsored by the [Kilo OSS Program](https://kilo.ai/oss)**                   |
-| <a href="https://m.do.co/c/0062035db3e4"><img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_icon_blue.svg" width="50" height="50"></a> | **Cloud infrastructure is supported by [DigitalOcean](https://m.do.co/c/0062035db3e4)**                                                       |
-| <a href="https://fyrastack.com"><img src="https://fyrastack.com/logo.svg" width="50" height="50"></a>                                                                           | **Virtual machines provided by [Fyra Stack](https://fyrastack.com/)**                        |
+- 本项目遵循 **GNU General Public License v3.0（GPL-3.0）** 开源协议，详见 [LICENSE](LICENSE)。
+- 本软件本身不提供、不存储任何视频资源，所有播放源均由用户自行导入的规则动态解析；请遵守当地法律法规，勿将本软件用于任何商业或侵权用途。
+- **隐私政策**：本应用不收集任何用户个人数据，不包含任何广告或遥测统计组件。
 
 ## 致谢
 
-特别感谢 [XpathSelector](https://github.com/simonkimi/xpath_selector) 这个优秀的项目是本项目的基石。
-
-特别感谢 [弹弹play](https://www.dandanplay.com/) 本项目使用了 弹弹play开放平台 以提供弹幕交互。
-
-特别感谢 [Bangumi](https://bangumi.tv/) 本项目使用了 Bangumi 开放 API 以提供番剧元数据。
-
-特别感谢 [Anime4K](https://github.com/bloc97/Anime4K) 本项目使用 Anime4K 进行实时超分。
-
-特别感谢 [SyncPlay](https://github.com/Syncplay/syncplay) 本项目使用 SyncPlay 协议并通过 SyncPlay 公共服务器实现一起看功能。
-
-特别感谢 [所有贡献者](https://github.com/Predidit/Kazumi/graphs/contributors) 本项目因为你们变得更好。
-
-特别感谢 [trace.moe](https://trace.moe) 本项目使用了 trace.moe 提供的图片识别番剧功能。
-
-感谢 [media-kit](https://github.com/media-kit/media-kit) 本项目跨平台媒体播放能力来自 media-kit。
-
-感谢 [avbuild](https://github.com/wang-bin/avbuild) 本项目使用了来自 avbuild 的树外补丁实现非标准视频流播放。
-
-感谢 [hive](https://github.com/isar/hive) 本项目持久化储存能力来自 hive。
+- 感谢上游项目 **[Predidit/Kazumi](https://github.com/Predidit/Kazumi)** 及其所有贡献者提供了坚实的番剧采集、播放与同步架构。
+- 感谢 **[Predidit/KazumiRules](https://github.com/Predidit/KazumiRules)** 社区维护的丰富番剧规则。
+- 感谢 **[Bangumi](https://bangumi.tv/)**、**[弹弹play](https://www.dandanplay.com/)**、**[media-kit](https://github.com/media-kit/media-kit)**、**[XpathSelector](https://github.com/simonkimi/xpath_selector)** 与 **[hive_ce](https://pub.dev/packages/hive_ce)** 等开源项目与开放平台。

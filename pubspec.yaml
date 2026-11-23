@@ -1,5 +1,5 @@
 name: kazumi
-description: "A new Flutter project."
+description: "Kazumi TV - Pure Android TV anime client based on Predidit/Kazumi with D-pad UX and OTA updates."
 publish_to: "none"
 version: 1.0.0+10000
 
